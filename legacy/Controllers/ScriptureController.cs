@@ -8,7 +8,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Surbgirq.DataAccessApi.Controllers
+namespace Surbgirq.GraphApi.Controllers
 {
     [ApiController]
     [Route("[controller]")]
@@ -200,7 +200,68 @@ namespace Surbgirq.DataAccessApi.Controllers
         }
 
 
-       
+        public async Task<List<IRecord>> queryRead(string query)
+        {
+            List<IRecord> _records = null;
+
+            IAsyncSession session = _driver.AsyncSession();
+            try
+            {
+                _records = await session.ReadTransactionAsync(async tx =>
+                {
+
+                    // Send cypher query to the database
+                    var _reader = await tx.RunAsync(query);
+
+                    List<IRecord> _records = await _reader.ToListAsync();
+
+
+                    return _records;
+                });
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("{0} Exception caught.", e);
+            }
+
+            finally
+            {
+                // asynchronously close session
+                await session.CloseAsync();
+            }
+
+
+            return _records;
+        }
+
+        public class Video
+        {
+            public string Id { get;  set; }
+            public string YoutubeId { get; set; }
+            public string Title { get; set; }
+            public DateTime? Published { get; set; }
+        }
+        private async Task<List<Video>> GetVideos(IDriver driver)
+        {
+            var statement = "MATCH (n:Video) RETURN n";
+            var session = driver.AsyncSession();
+                return await session.ReadTransactionAsync(async tx => {
+                    var result = await tx.RunAsync(statement);
+                    return await result.ToListAsync<Video>(record => {
+                        var node = record[0].As<INode>();
+                        return new Video
+                        {
+                            Id = node.Properties.GetValueOrDefault("id", null).As<string>(),
+                            YoutubeId = node.Properties.GetValueOrDefault("youtubeId", null).As<string>(),
+                            Title = node.Properties.GetValueOrDefault("title", null).As<string>(),
+                            Published = node.Properties.GetValueOrDefault("published", null).As<DateTimeOffset?>()?.UtcDateTime
+                        };
+                    });
+                });
+            
+        }
+
 
         //[HttpGet]
         //public List<string> GetPeople()

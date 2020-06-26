@@ -1,4 +1,4 @@
-namespace Surbgirq.DataAccessApi.Configs
+namespace Surbgirq.GraphApi.Configs
 {
     public class SwaggerOptions
     {

@@ -1,6 +1,6 @@
 using System;
 
-namespace Surbgirq.DataAccessApi
+namespace Surbgirq.GraphApi
 {
     public class WeatherForecast
     {

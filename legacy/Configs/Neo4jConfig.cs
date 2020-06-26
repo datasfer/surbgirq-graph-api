@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Surbgirq.DataAccessApi.Configs
+namespace Surbgirq.GraphApi.Configs
 {
     public class Neo4jConfig
     {

@@ -9,7 +9,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Serilog;
 
-namespace Surbgirq.DataAccessApi
+namespace Surbgirq.GraphApi
 {
     public class Program
     {

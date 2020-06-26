@@ -13,9 +13,9 @@ using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using Neo4j.Driver;
 using Neo4jClient;
-using Surbgirq.DataAccessApi.Configs;
+using Surbgirq.GraphApi.Configs;
 
-namespace Surbgirq.DataAccessApi
+namespace Surbgirq.GraphApi
 {
     public class Startup
     {

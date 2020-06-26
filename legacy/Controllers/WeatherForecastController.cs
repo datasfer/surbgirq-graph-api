@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
-namespace Surbgirq.DataAccessApi.Controllers
+namespace Surbgirq.GraphApi.Controllers
 {
     [ApiController]
     [Route("[controller]")]

@@ -1,0 +1,34 @@
+
+
+# Neo4j driver for .net
+
+https://github.com/neo4j/neo4j-dotnet-driver
+https://neo4j.com/docs/driver-manual/4.1/cypher-workflow/
+https://neo4j.com/docs/api/dotnet-driver/4.1/html/f7d9eea1-5357-f1de-8a54-336a77141b6d.htm
+https://github.com/neo4j-examples/movies-dotnet-bolt/tree/master/Neo4j.Driver.Example/Controllers
+
+
+## projects who use neo4j in net core
+https://github.com/maksymilianwawrzyniak/MovieShop/tree/master/WebApplication
+
+- use env variables
+https://github.com/kaw393939/learanaNeo
+
+- fetsingle,fetchall samples
+https://github.com/catchouli/everythingv3/blob/ae48b5727b25ba2e5e20028b4b11d4da6100ab05/RaocowDotnet/Models/Video.cs
+
+- add as scoped of IDriver
+https://github.com/catchouli/everythingv3/blob/ae48b5727b25ba2e5e20028b4b11d4da6100ab05/RaocowDotnet/Startup.cs
+
+
+- convert readed raw data good approach
+https://github.com/eliodecolli/FleetwoodMac/blob/2f3748a6ae5aafe5be106db8330175f5dcbcaedc/FleetwoodMac/Facade/Persistence/Neo4j/NeoConnection.cs
+https://github.com/SkillsFundingAgency/CalculateFunding-Common/blob/0b9f801a56efa0f697c9a32e4cbb4edf67ac7c7d/CalculateFunding.Common.Graph/Neo4J/GraphRepository.cs
+
+- query, serach
+https://github.com/MikePohatu/BirdsNest/blob/80b374010b1a03c4f3189a29e9dbc2927376bfdc/source/BirdsNest.Net/Console/neo4jProxy/Neo4jService.cs
+
+
+
+- Neo4j tests in c#
+https://github.com/SkillsFundingAgency/CalculateFunding-Common/blob/0b9f801a56efa0f697c9a32e4cbb4edf67ac7c7d/CalculateFunding.Common.Graph.UnitTests/Neo4J/GraphRepositoryTests.cs
