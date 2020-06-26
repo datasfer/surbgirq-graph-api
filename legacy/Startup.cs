@@ -11,28 +11,41 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using Neo4j.Driver;
 using Surbgirq.DataAccessApi.Configs;
 
 namespace Surbgirq.DataAccessApi
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+
+        IWebHostEnvironment CurrentEnv;
+        public IConfiguration Configuration { get; }
+
+        public Startup(IConfiguration configuration, IWebHostEnvironment env)
         {
+            CurrentEnv = env;
             Configuration = configuration;
         }
 
-        public IConfiguration Configuration { get; }
+
+        
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
 
-             services.AddSwaggerGen(c =>
+            services.AddLogging();
+
+            services.AddSwaggerGen(c =>
                  {
-                     c.SwaggerDoc("v1", new OpenApiInfo { Title = "StaffMinded API", Version = "v1" });
+                     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Surbgirq graph db access API", Version = "v1" });
                  });
+
+            var neo4jConfig = new Neo4jConfig();
+            Configuration.GetSection(nameof(Neo4jConfig)).Bind(neo4jConfig);
+            services.AddSingleton(GraphDatabase.Driver(neo4jConfig.InstanceUri));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -43,7 +56,9 @@ namespace Surbgirq.DataAccessApi
                 app.UseDeveloperExceptionPage();
             }
 
-             var swaggerOptions = new SwaggerOptions();
+            
+
+            var swaggerOptions = new SwaggerOptions();
             Configuration.GetSection(nameof(SwaggerOptions)).Bind(swaggerOptions);
 
             app.UseSwagger(options => { options.RouteTemplate = swaggerOptions.JsonRoute; });

@@ -351,3 +351,4 @@ ASALocalRun/
 healthchecksdb
 /.well-known
 /StaffMinded.Web/.config/dotnet-tools.json
+/wwwroot/Artefacts/Logs/*
