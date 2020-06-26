@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Neo4j.Driver;
+using Neo4jClient;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -13,18 +15,206 @@ namespace Surbgirq.DataAccessApi.Controllers
     public class ScriptureController : ControllerBase
     {
         IDriver _driver;
+        //IGraphClient _neo4jClient;
         private readonly ILogger<ScriptureController> _logger;
         public ScriptureController( IDriver driver,
+          //                          IGraphClient neo4jClient,
                                     ILogger<ScriptureController> logger) 
         {
             _driver = driver;
             _logger = logger;
+            //_neo4jClient = neo4jClient;
         }
 
         [HttpGet]
-        public void get()
+        public async Task<bool> get()
         {
-            _logger.LogInformation("Test");
+            IAsyncSession session = _driver.AsyncSession(o => o.WithDefaultAccessMode(AccessMode.Read));
+            try
+            {
+                await session.ReadTransactionAsync(PrintChapters);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "failed to connect neo4j");
+            }
+            finally
+            {
+                await session.CloseAsync();
+            }
+
+
+            //AddEmployAndMakeFriends();
+
+            //var neo4jClient = new GraphClient(new Uri("http://localhost:11006"));
+            //neo4jClient.Connect();
+            //var query = neo4jClient.Cypher
+            //    .Match("MATCH (n:Chapter) RETURN n")
+            //    .Return<Chapter>("Chapter").Results;
+
+            ////            IDriver driver = GraphDatabase.Driver("neo4j://localhost:7687", AuthTokens.Basic("username", "CHANGE_ME"));
+            //IAsyncSession session = _driver.AsyncSession(o => o.WithDatabase("neo4j"));
+            //try
+            //{
+            //    IResultCursor cursor = await session.RunAsync("MATCH (n:Chapter) RETURN n");
+            //    var res = await cursor.ConsumeAsync();
+
+            //}
+            //catch (Exception ex)
+            //{
+            //    _logger.LogError(ex, "failed to connect neo4j");
+            //}
+            //finally
+            //{
+            //    await session.CloseAsync();
+            //}
+
+           // await _driver.CloseAsync();
+
+            return true;
         }
+
+        class Chapter
+        { 
+            public string Book { get; set; }
+            public int Number { get; set; }
+            public override string ToString()
+            {
+                return $"{Book}-{Number}";
+            }
+        }
+
+        private async Task<int> PrintChapters(IAsyncTransaction tx)
+        {
+            //var cursor = await tx.RunAsync("MATCH (a)-[:KNOWS]->(b) RETURN a.name, b.name");
+            // IResultCursor cursor = await tx.RunAsync("MATCH (n:Chapter) RETURN n.` book`, n.` num`");
+            IResultCursor cursor = await tx.RunAsync("MATCH (n:Chapter) RETURN n");
+
+            var count = 0;
+
+            await cursor.ForEachAsync(record =>
+            {
+               count++;
+
+                var node = record["n"].As<INode>();
+                var chapter = new Chapter
+                {
+                    Book = node[" book"].As<string>(),
+                    Number = node[" num"].As<int>(),
+                };
+
+                Debug.WriteLine(chapter.ToString());
+                //Debug.WriteLine($"Book: {record["n.` book`"]}, Num: {record["n.` num`"]}");
+            });
+
+            return count;
+        }
+
+        // Create a company node
+        private Task<IResultCursor> AddCompany(IAsyncTransaction tx, string name)
+        {
+            return tx.RunAsync("CREATE (a:Company {name: $name})", new { name });
+        }
+
+        // Create a person node
+        private Task<IResultCursor> AddPerson(IAsyncTransaction tx, string name)
+        {
+            return tx.RunAsync("CREATE (a:Person {name: $name})", new { name });
+        }
+
+        // Create an employment relationship to a pre-existing company node.
+        // This relies on the person first having been created.
+        //private IResult Employ(ITransaction tx, string personName, string companyName)
+        //{
+        //    return tx.Run(@"MATCH (person:Person {name: $personName})
+        //     MATCH (company:Company {name: $companyName})
+        //     CREATE (person)-[:WORKS_FOR]->(company)", new { personName, companyName });
+        //}
+
+        // Create a friendship between two people.
+        //private IResult MakeFriends(ITransaction tx, string name1, string name2)
+        //{
+        //    return tx.Run(@"MATCH (a:Person {name: $name1})
+        //     MATCH (b:Person {name: $name2})
+        //     MERGE (a)-[:KNOWS]->(b)", new { name1, name2 });
+        //}
+
+        //// Match and display all friendships.
+        //private int PrintFriendships(ITransaction tx)
+        //{
+        //    var result = tx.Run("MATCH (a)-[:KNOWS]->(b) RETURN a.name, b.name");
+
+        //    var count = 0;
+        //    foreach (var record in result)
+        //    {
+        //        count++;
+        //        Console.WriteLine($"{record["a.name"]} knows {record["b.name"]}");
+        //    }
+
+        //    return count;
+        //}
+
+        private void AddEmployAndMakeFriends()
+        {
+            // To collect the session bookmarks
+            var savedBookmarks = new List<Bookmark>();
+
+            IAsyncSession session1;
+            IAsyncSession session2;
+
+            try
+            {
+                // Create the first person and employment relationship.
+                session1 = _driver.AsyncSession(o => o.WithDefaultAccessMode(AccessMode.Write));
+                {
+                    session1.WriteTransactionAsync(tx => AddCompany(tx, "Wayne Enterprises"));
+                    session1.WriteTransactionAsync(tx => AddPerson(tx, "Alice"));
+                    //session1.WriteTransactionAsync(tx => Employ(tx, "Alice", "Wayne Enterprises"));
+
+                    savedBookmarks.Add(session1.LastBookmark);
+                }
+
+                // Create the second person and employment relationship.
+                session2 = _driver.AsyncSession(o => o.WithDefaultAccessMode(AccessMode.Write));
+                {
+                    session2.WriteTransactionAsync(tx => AddCompany(tx, "LexCorp"));
+                    session2.WriteTransactionAsync(tx => AddPerson(tx, "Bob"));
+                    //session2.WriteTransaction(tx => Employ(tx, "Bob", "LexCorp"));
+
+                    savedBookmarks.Add(session2.LastBookmark);
+                }
+
+                session1.CloseAsync();
+                session2.CloseAsync();
+            }
+            finally
+            {
+                //session1.CloseAsync();
+                //session2.CloseAsync();
+            }
+
+            //// Create a friendship between the two people created above.
+            var session3 = _driver.AsyncSession(o => o.WithDefaultAccessMode(AccessMode.Read));
+            session3.ReadTransactionAsync(PrintChapters);
+            session3.CloseAsync();
+        }
+
+
+       
+
+        //[HttpGet]
+        //public List<string> GetPeople()
+        //{
+        //    //var session = _driver.AsyncSession();
+        //    //{
+        //    //    return session.ReadTransactionAsync(async (tx) =>
+        //    //    {
+        //    //        var result = tx.RunAsync("MATCH (n:Chapter) RETURN n");
+        //    //        //return result.Result.FetchAsync() (record => record[0].As<string>()).ToList();
+        //    //    });
+        //    //}
+
+        //    return null;
+        //}
     }
 }
