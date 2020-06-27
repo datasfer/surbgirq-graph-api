@@ -14,6 +14,8 @@ using Microsoft.OpenApi.Models;
 using Neo4j.Driver;
 using Neo4jClient;
 using Surbgirq.GraphApi.Configs;
+using Surbgirq.GraphApi.GraphDB;
+using Surbgirq.GraphApi.Interfaces;
 
 namespace Surbgirq.GraphApi
 {
@@ -47,6 +49,11 @@ namespace Surbgirq.GraphApi
             var neo4jConfig = new Neo4jConfig();
             Configuration.GetSection(nameof(Neo4jConfig)).Bind(neo4jConfig);
             services.AddSingleton(GraphDatabase.Driver(neo4jConfig.InstanceUri, AuthTokens.None));
+
+            services.AddSingleton(neo4jConfig);
+
+            services.AddSingleton<IGraphRepository, GraphRepository>();
+            services.AddSingleton<ICypherBuilderFactory, CypherBuilderFactory>();
 
             var gc = new GraphClient(new Uri(neo4jConfig.InstanceUri));
             services.AddSingleton(gc);

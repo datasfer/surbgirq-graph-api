@@ -2,6 +2,11 @@
 using Microsoft.Extensions.Logging;
 using Neo4j.Driver;
 using Neo4jClient;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Surbgirq.GraphApi.GraphDB;
+using Surbgirq.GraphApi.Interfaces;
+using Surbgirq.GraphApi.Models;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -12,23 +17,55 @@ namespace Surbgirq.GraphApi.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class ScriptureController : ControllerBase
+    public class ScriptureController : Controller
     {
         IDriver _driver;
         //IGraphClient _neo4jClient;
         private readonly ILogger<ScriptureController> _logger;
+        private readonly IGraphRepository _graphRepository;
         public ScriptureController( IDriver driver,
-          //                          IGraphClient neo4jClient,
+          //                        IGraphClient neo4jClient,
+                                    IGraphRepository graphRepository,
                                     ILogger<ScriptureController> logger) 
         {
             _driver = driver;
             _logger = logger;
+            _graphRepository = graphRepository;
             //_neo4jClient = neo4jClient;
         }
 
         [HttpGet]
-        public async Task<bool> get()
+        public async Task<ContentResult> get()
         {
+            var jsonString = await _graphRepository.GetNodesJsonOf<Company>();
+            List<JObject> res = new List<JObject>();
+            jsonString.ToList().ForEach(str => res.Add(JObject.Parse(str)));
+            
+            var g = $"[{string.Join(",", jsonString.ToArray())}]";
+            
+            return Content(g, "application/json");
+
+            //return JObject.Parse(g);
+            //return new JsonResult(Content(g, "application/json"));
+            //return JsonConvert.DeserializeObject(g)
+            //return Json(g);
+        }
+        async Task<bool> test()
+        { 
+            var ttt = await _graphRepository.FindAll<Company>(("name", "LexCorp"));
+
+            var ys =  await _graphRepository.GetNodesByLabel<Company>();
+
+            foreach (var c in ys)
+            {
+                Debug.WriteLine(c.ToString());
+            }
+            
+
+            var xs = await _graphRepository.GetAllEntities<Company>();
+
+           // xs.ToList().ForEach(a => Debug.WriteLine(a.Node));
+
             IAsyncSession session = _driver.AsyncSession(o => o.WithDefaultAccessMode(AccessMode.Read));
             try
             {
@@ -74,15 +111,7 @@ namespace Surbgirq.GraphApi.Controllers
             return true;
         }
 
-        class Chapter
-        { 
-            public string Book { get; set; }
-            public int Number { get; set; }
-            public override string ToString()
-            {
-                return $"{Book}-{Number}";
-            }
-        }
+        
 
         private async Task<int> PrintChapters(IAsyncTransaction tx)
         {
@@ -200,7 +229,7 @@ namespace Surbgirq.GraphApi.Controllers
         }
 
 
-        public async Task<List<IRecord>> queryRead(string query)
+        private async Task<List<IRecord>> queryRead(string query)
         {
             List<IRecord> _records = null;
 
