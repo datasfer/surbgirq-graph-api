@@ -49,6 +49,7 @@ namespace Surbgirq.GraphApi
             var neo4jConfig = new Neo4jConfig();
             Configuration.GetSection(nameof(Neo4jConfig)).Bind(neo4jConfig);
             services.AddSingleton(GraphDatabase.Driver(neo4jConfig.InstanceUri, AuthTokens.None));
+            services.AddSingleton(GraphDatabase.Driver(neo4jConfig.InstanceUri, AuthTokens.Basic("neo4j", "CHANGE_ME")));
 
             services.AddSingleton(neo4jConfig);
 

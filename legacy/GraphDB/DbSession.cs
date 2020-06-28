@@ -15,7 +15,7 @@ namespace Surbgirq.GraphApi.GraphDB
         {
             _session = driver.AsyncSession(options => 
             {
-                //options.WithDatabase(databaseName); 
+                options.WithDatabase(databaseName); 
                 options.WithDefaultAccessMode(accessMode); 
             });
         }

@@ -21,6 +21,8 @@ namespace Surbgirq.GraphApi.Interfaces
         Task<T> First<T>((string, string) parameter) where T : BaseModel;
         Task<IEnumerable<T>> FindAll<T>((string, string) parameter) where T : BaseModel;
 
-        Task<IEnumerable<string>> GetNodesJsonOf<T>() where T : BaseModel;
+        Task<IEnumerable<string>> GetNodesJsonOf(string nodeName);// where T : BaseModel;
+        Task<IEnumerable<string>> RunQuery(string query);
+
     }
 }

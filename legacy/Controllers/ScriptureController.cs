@@ -37,7 +37,10 @@ namespace Surbgirq.GraphApi.Controllers
         [HttpGet]
         public async Task<ContentResult> get()
         {
-            var jsonString = await _graphRepository.GetNodesJsonOf<Company>();
+            var jsonString = await _graphRepository.GetNodesJsonOf("Chapter");
+            foreach(var f in jsonString)
+                Console.WriteLine(f);
+            
             List<JObject> res = new List<JObject>();
             jsonString.ToList().ForEach(str => res.Add(JObject.Parse(str)));
             
@@ -50,6 +53,23 @@ namespace Surbgirq.GraphApi.Controllers
             //return JsonConvert.DeserializeObject(g)
             //return Json(g);
         }
+
+
+        [HttpGet("query")]
+        public async Task<ContentResult> runCypher(string query)
+        {
+            var jsonString = await _graphRepository.RunQuery(query);
+            foreach(var f in jsonString)
+                Console.WriteLine(f);
+            
+            List<JObject> res = new List<JObject>();
+            jsonString.ToList().ForEach(str => res.Add(JObject.Parse(str)));
+            
+            var g = $"[{string.Join(",", jsonString.ToArray())}]";
+            
+            return Content(g, "application/json");
+        }
+
         async Task<bool> test()
         { 
             var ttt = await _graphRepository.FindAll<Company>(("name", "LexCorp"));

@@ -80,14 +80,38 @@ namespace Surbgirq.GraphApi.GraphDB
         }
 
 
-        public async Task<IEnumerable<string>> GetNodesJsonOf<T>() where T : BaseModel
+        public async Task<IEnumerable<string>> GetNodesJsonOf(string nodeName)
         {
             var dbSession = DbSession.StartSession(_driver, _config.DatabaseName);
-            var query = CypherQuery.GetAll<T>();
+            var query = CypherQuery.GetAll(nodeName);
             var cursor = await dbSession.AsyncSession.RunAsync(query);
             return (await cursor.ToListAsync()).Select(process);
 
             string process(IRecord _) => _[0].As<INode>().Properties.AsJson();
+        }
+
+
+
+        public async Task<IEnumerable<string>> RunQuery(string query)
+        {
+            var dbSession = DbSession.StartSession(_driver, _config.DatabaseName);
+            var cursor = await dbSession.AsyncSession.RunAsync(query);
+            return (await cursor.ToListAsync()).Select(process);
+
+            string process(IRecord _) 
+            {
+                switch (_[0])
+                {
+                    case INode node:
+                        Console.WriteLine(node.Properties);
+                        return node.Properties.AsJson();
+                        break;
+                    default:
+                        return $"{{'num': {_[0]}}}";
+                }
+            }
+            //_[0])](_[0]);
+            
         }
 
 

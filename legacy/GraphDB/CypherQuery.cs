@@ -18,6 +18,15 @@ namespace Surbgirq.GraphApi.GraphDB
             return query.ToString();
         }
 
+        public static string GetAll(string node) 
+        {
+            var cypherBuilder = new CypherBuilder();
+            var query = cypherBuilder.AddMatch(new[] { new Match { Pattern = $"(n:{node})" } })
+                                     .AddReturn(new[] { "n" });
+
+            return query.ToString();
+        }
+
 
         public static string Find<TNode>((string, string) parameter) where TNode : class
         {
