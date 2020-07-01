@@ -1,6 +1,6 @@
 using System;
 
-namespace Surbgirq.Telegram
+namespace Surbgirq.TeleBot
 {
     public class WeatherForecast
     {

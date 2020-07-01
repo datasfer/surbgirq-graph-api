@@ -10,8 +10,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Surbgirq.TeleBot.Config;
+using Surbgirq.TeleBot.Services;
 
-namespace Surbgirq.Telegram
+namespace Surbgirq.TeleBot
 {
     public class Startup
     {
@@ -25,7 +27,12 @@ namespace Surbgirq.Telegram
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddScoped<IUpdateService, UpdateService>();
+            services.AddSingleton<IBotClient, BotClient>();
+            services.Configure<BotConfiguration>(Configuration.GetSection("BotConfig"));
+
             services.AddControllers();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

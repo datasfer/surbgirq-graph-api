@@ -1,0 +1,14 @@
+# Webhook registration
+
+1. Create "data.json"
+{
+  "url": "https://bots.domain.tld/api/v1/echo"
+}
+
+2. Set hook
+curl -X POST -d @data.json -H "Content-Type: application/json" "https://api.telegram.org/botYOURBOTTOKEN/setWebhook"
+
+
+
+# ngrok
+ngrok http -host-header=localhost 63459
