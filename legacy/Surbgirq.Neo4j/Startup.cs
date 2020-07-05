@@ -31,14 +31,11 @@ namespace Surbgirq.GraphApi
             Configuration = configuration;
         }
 
-
-        
-
+  
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
-
             services.AddLogging();
 
             services.AddSwaggerGen(c =>
@@ -48,8 +45,8 @@ namespace Surbgirq.GraphApi
 
             var neo4jConfig = new Neo4jConfig();
             Configuration.GetSection(nameof(Neo4jConfig)).Bind(neo4jConfig);
-            services.AddSingleton(GraphDatabase.Driver(neo4jConfig.InstanceUri, AuthTokens.None));
-            //services.AddSingleton(GraphDatabase.Driver(neo4jConfig.InstanceUri, AuthTokens.Basic("neo4j", "CHANGE_ME")));
+//            services.AddSingleton(GraphDatabase.Driver(neo4jConfig.InstanceUri, AuthTokens.None));
+            services.AddSingleton(GraphDatabase.Driver(neo4jConfig.InstanceUri, AuthTokens.Basic("neo4j", "CHANGE_ME")));
 
             services.AddSingleton(neo4jConfig);
 
@@ -69,8 +66,7 @@ namespace Surbgirq.GraphApi
                 app.UseDeveloperExceptionPage();
             }
 
-            
-
+           
             var swaggerOptions = new SwaggerOptions();
             Configuration.GetSection(nameof(SwaggerOptions)).Bind(swaggerOptions);
 
@@ -80,7 +76,7 @@ namespace Surbgirq.GraphApi
                 c.SwaggerEndpoint(swaggerOptions.UIEndpoint, swaggerOptions.Description);
             });
 
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
 
             app.UseRouting();
 

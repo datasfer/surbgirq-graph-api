@@ -58,7 +58,10 @@ namespace Surbgirq.GraphApi.Controllers
         [HttpGet("query")]
         public async Task<ContentResult> runCypher(string query)
         {
+            Console.WriteLine("Query");    
             var jsonString = await _graphRepository.RunQuery(query);
+            Console.WriteLine(jsonString);    
+
             foreach(var f in jsonString)
                 Console.WriteLine(f);
             
@@ -66,6 +69,26 @@ namespace Surbgirq.GraphApi.Controllers
             jsonString.ToList().ForEach(str => res.Add(JObject.Parse(str)));
             
             var g = $"[{string.Join(",", jsonString.ToArray())}]";
+                            Console.WriteLine(g);
+            
+            return Content(g, "application/json");
+        }
+
+        [HttpGet("books")]
+        public async Task<ContentResult> getBooks()
+        {
+            var query = "match (b:Book) return b;";
+            var jsonString = await _graphRepository.RunQuery(query);
+            Console.WriteLine(jsonString);    
+
+            foreach(var f in jsonString)
+                Console.WriteLine(f);
+            
+            List<JObject> res = new List<JObject>();
+            jsonString.ToList().ForEach(str => res.Add(JObject.Parse(str)));
+            
+            var g = $"[{string.Join(",", jsonString.ToArray())}]";
+                            Console.WriteLine(g);
             
             return Content(g, "application/json");
         }
