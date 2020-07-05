@@ -12,6 +12,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Surbgirq.TeleBot.Config;
 using Surbgirq.TeleBot.Services;
+using Microsoft.AspNetCore.HttpOverrides;
 
 namespace Surbgirq.TeleBot
 {
@@ -38,11 +39,19 @@ namespace Surbgirq.TeleBot
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+
+        
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
 
+            app.UseForwardedHeaders(new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost
+            });
+    
+            app.UseHsts();
             app.UseHttpsRedirection();
 
             app.UseRouting();
@@ -53,6 +62,7 @@ namespace Surbgirq.TeleBot
             {
                 endpoints.MapControllers();
             });
+
         }
     }
 }
