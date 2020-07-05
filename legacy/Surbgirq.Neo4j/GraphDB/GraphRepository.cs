@@ -15,6 +15,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
+
 namespace Surbgirq.GraphApi.GraphDB
 {
     public class GraphRepository : IGraphRepository, IDisposable
@@ -90,25 +91,38 @@ namespace Surbgirq.GraphApi.GraphDB
             string process(IRecord _) => _[0].As<INode>().Properties.AsJson();
         }
 
-
-
-        public async Task<IEnumerable<string>> RunQuery(string query)
+        public async Task<IEnumerable<IDictionary<string, string>>> RunQuery(string query)
         {
             var dbSession = DbSession.StartSession(_driver, _config.DatabaseName);
             var cursor = await dbSession.AsyncSession.RunAsync(query);
             return (await cursor.ToListAsync()).Select(process);
 
-            string process(IRecord _) 
+            IDictionary<string, string> process(IRecord record) 
             {
-                switch (_[0])
+                var vs = record.Values;
+                var res = new Dictionary<string, string>();
+                foreach (var v in vs)
                 {
-                    case INode node:
-                        Console.WriteLine(node.Properties);
-                        return node.Properties.AsJson();
-                        break;
-                    default:
-                        return $"{{'num': {_[0]}}}";
+
+                    switch (v.Value)
+                    {
+                        case INode node:
+                            foreach (var np in node.Properties)
+                            {
+                                res.Add(np.Key, np.Value.ToString());
+                            }
+                            break;
+                        case IPath path:
+                            // TODO: process this case
+                            res.Add(v.Key, path.ToString());
+                            break;
+                        default:
+                            res.Add($"{v.Key}", $"{v.Value}");
+                            break;
+                    }
                 }
+
+                return res;
             }
             //_[0])](_[0]);
             

@@ -22,7 +22,7 @@ namespace Surbgirq.GraphApi.Interfaces
         Task<IEnumerable<T>> FindAll<T>((string, string) parameter) where T : BaseModel;
 
         Task<IEnumerable<string>> GetNodesJsonOf(string nodeName);// where T : BaseModel;
-        Task<IEnumerable<string>> RunQuery(string query);
+        Task<IEnumerable<IDictionary<string, string>>> RunQuery(string query);
 
     }
 }

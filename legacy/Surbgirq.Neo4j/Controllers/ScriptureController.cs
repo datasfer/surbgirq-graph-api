@@ -4,6 +4,7 @@ using Neo4j.Driver;
 using Neo4jClient;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Surbgirq.GraphApi.Extensions;
 using Surbgirq.GraphApi.GraphDB;
 using Surbgirq.GraphApi.Interfaces;
 using Surbgirq.GraphApi.Models;
@@ -34,64 +35,120 @@ namespace Surbgirq.GraphApi.Controllers
             //_neo4jClient = neo4jClient;
         }
 
-        [HttpGet]
-        public async Task<ContentResult> get()
-        {
-            var jsonString = await _graphRepository.GetNodesJsonOf("Chapter");
-            foreach(var f in jsonString)
-                Console.WriteLine(f);
-            
-            List<JObject> res = new List<JObject>();
-            jsonString.ToList().ForEach(str => res.Add(JObject.Parse(str)));
-            
-            var g = $"[{string.Join(",", jsonString.ToArray())}]";
-            
-            return Content(g, "application/json");
-
-            //return JObject.Parse(g);
-            //return new JsonResult(Content(g, "application/json"));
-            //return JsonConvert.DeserializeObject(g)
-            //return Json(g);
-        }
-
-
         [HttpGet("query")]
         public async Task<ContentResult> runCypher(string query)
         {
-            Console.WriteLine("Query");    
-            var jsonString = await _graphRepository.RunQuery(query);
-            Console.WriteLine(jsonString);    
-
-            foreach(var f in jsonString)
-                Console.WriteLine(f);
-            
-            List<JObject> res = new List<JObject>();
-            jsonString.ToList().ForEach(str => res.Add(JObject.Parse(str)));
-            
-            var g = $"[{string.Join(",", jsonString.ToArray())}]";
-                            Console.WriteLine(g);
-            
-            return Content(g, "application/json");
+            var str = await getQueryJson(query);
+            return Content(str, "application/json");
         }
 
         [HttpGet("books")]
         public async Task<ContentResult> getBooks()
         {
             var query = "match (b:Book) return b;";
-            var jsonString = await _graphRepository.RunQuery(query);
-            Console.WriteLine(jsonString);    
-
-            foreach(var f in jsonString)
-                Console.WriteLine(f);
+            var str = await getQueryJson(query);
+            return Content(str, "application/json");
             
-            List<JObject> res = new List<JObject>();
-            jsonString.ToList().ForEach(str => res.Add(JObject.Parse(str)));
-            
-            var g = $"[{string.Join(",", jsonString.ToArray())}]";
-                            Console.WriteLine(g);
-            
-            return Content(g, "application/json");
         }
+
+        [HttpGet("book/chapters")]
+        public async Task<ContentResult> getBookChaptersCount(string book)
+        {
+            
+            var query = $"match (b:Book) where b.book = '{book}' return b.chapters as num;";
+            var jsonString = (await _graphRepository.RunQuery(query)).ToList();
+            var res = toJsonProps(jsonString);
+            return Content(res, "application/json");
+        }
+
+        [HttpGet("book/{girq}/chapter/{ch_num}/sections")]
+        public async Task<ContentResult> getBookChapterSections(string girq, int ch_num)
+        {
+
+            var query = $"match (b:Book {{book: '{girq}' }})-[:CONTAINS]-()-[*]->(s:Section) WHERE s.chapter={ch_num} " +
+                $"return s.num as num, s.title as title, b.book as book  " +
+                $"order by s.num;";
+         
+            var jsonString = (await _graphRepository.RunQuery(query)).ToList();
+
+            var res = toJsonPropsArr(jsonString);
+            return Content(res, "application/json");
+        }
+
+        [HttpGet("translations")]
+        public async Task<ContentResult> getTranslations()
+        {
+            var query = "match (t:Translation) return t;";
+            var str = await getQueryJson(query);
+            return Content(str, "application/json");
+        }
+
+        [HttpGet("scriptures")]
+        public async Task<ContentResult> getScriptures()
+        {
+            var query = "match (s:Scripture) return s;";
+            var str =  await getQueryJson(query);
+            return Content(str, "application/json");
+
+        }
+
+        /// <summary>
+        /// converting to json cypher output
+        /// </summary>
+        /// <param name="query"></param>
+        /// <returns></returns>
+        private async Task<string> getQueryJson(string query)
+        {
+            var jsonString = await _graphRepository.RunQuery(query);
+            return toJsonPropsArr(jsonString);
+            
+        }
+
+        private static string toJsonEntityArr(IEnumerable<IDictionary<string, string>> jsonString)
+        {
+            List<JObject> res = new List<JObject>();
+            foreach (var jStr in jsonString)
+            {
+                var j = jStr.Values.AsJson();
+                var jObj = JObject.Parse(j);
+                res.Add(jObj);
+                //res.Add(JObject.Parse(str[0].Item2)));
+            }
+
+            // var g = $"[{string.Join(",", jsonString.ToArray())}]";
+            //return ss; // Content($"[{ss}]", "application/json");
+            var str = res.Aggregate("", (a, b) => $"{a},{b}").Trim(',');
+            return $"[{str}]";
+        }
+
+        private static string toJsonPropsArr(IEnumerable<IDictionary<string, string>> jsonString)
+        {
+            List<JObject> res = new List<JObject>();
+
+            foreach (var jStr in jsonString)
+            {
+                var j = jStr.AsJson();
+                var jObj = JObject.Parse(j);
+                res.Add(jObj);
+            }
+            var str = res.Aggregate("", (a, b) => $"{a},{b}").Trim(',');
+            return $"[{str}]";
+        }
+
+        private static string toJsonProps(IEnumerable<IDictionary<string, string>> jsonString)
+        {
+            List<JObject> res = new List<JObject>();
+
+            foreach (var jStr in jsonString)
+            {
+                var j = jStr.AsJson();
+                var jObj = JObject.Parse(j);
+                res.Add(jObj);
+            }
+            var str = res.Aggregate("", (a, b) => $"{a},{b}").Trim(',');
+            return $"{str}";
+        }
+
 
         async Task<bool> test()
         { 
