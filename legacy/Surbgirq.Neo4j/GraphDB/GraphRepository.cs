@@ -107,6 +107,8 @@ namespace Surbgirq.GraphApi.GraphDB
                     switch (v.Value)
                     {
                         case INode node:
+                            res.Add("<id>", node.Id);
+                            res.Add("labels", node.Labels.Join(","));
                             foreach (var np in node.Properties)
                             {
                                 res.Add(np.Key, np.Value);
