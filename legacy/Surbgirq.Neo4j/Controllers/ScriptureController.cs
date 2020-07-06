@@ -104,7 +104,7 @@ namespace Surbgirq.GraphApi.Controllers
             
         }
 
-        private static string toJsonEntityArr(IEnumerable<IDictionary<string, string>> jsonString)
+        private static string toJsonEntityArr(IEnumerable<IDictionary<string, object>> jsonString)
         {
             List<JObject> res = new List<JObject>();
             foreach (var jStr in jsonString)
@@ -121,7 +121,7 @@ namespace Surbgirq.GraphApi.Controllers
             return $"[{str}]";
         }
 
-        private static string toJsonPropsArr(IEnumerable<IDictionary<string, string>> jsonString)
+        private static string toJsonPropsArr(IEnumerable<IDictionary<string, object>> jsonString)
         {
             List<JObject> res = new List<JObject>();
 
@@ -135,7 +135,7 @@ namespace Surbgirq.GraphApi.Controllers
             return $"[{str}]";
         }
 
-        private static string toJsonProps(IEnumerable<IDictionary<string, string>> jsonString)
+        private static string toJsonProps(IEnumerable<IDictionary<string, object>> jsonString)
         {
             List<JObject> res = new List<JObject>();
 

@@ -91,16 +91,16 @@ namespace Surbgirq.GraphApi.GraphDB
             string process(IRecord _) => _[0].As<INode>().Properties.AsJson();
         }
 
-        public async Task<IEnumerable<IDictionary<string, string>>> RunQuery(string query)
+        public async Task<IEnumerable<IDictionary<string, object>>> RunQuery(string query)
         {
             var dbSession = DbSession.StartSession(_driver, _config.DatabaseName);
             var cursor = await dbSession.AsyncSession.RunAsync(query);
             return (await cursor.ToListAsync()).Select(process);
 
-            IDictionary<string, string> process(IRecord record) 
+            IDictionary<string, object> process(IRecord record) 
             {
                 var vs = record.Values;
-                var res = new Dictionary<string, string>();
+                var res = new Dictionary<string, object>();
                 foreach (var v in vs)
                 {
 
@@ -109,15 +109,15 @@ namespace Surbgirq.GraphApi.GraphDB
                         case INode node:
                             foreach (var np in node.Properties)
                             {
-                                res.Add(np.Key, np.Value.ToString());
+                                res.Add(np.Key, np.Value);
                             }
                             break;
                         case IPath path:
                             // TODO: process this case
-                            res.Add(v.Key, path.ToString());
+                            res.Add(v.Key, path);
                             break;
                         default:
-                            res.Add($"{v.Key}", $"{v.Value}");
+                            res.Add($"{v.Key}", v.Value);
                             break;
                     }
                 }
