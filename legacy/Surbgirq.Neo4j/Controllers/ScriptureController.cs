@@ -155,6 +155,9 @@ namespace Surbgirq.GraphApi.Controllers
         [HttpGet("{language}/books/{book}/chapters/{chapter}/verses/{v1}/")]
         public async Task<ContentResult> getVerseRange(string language, string book, int chapter, int v1, int v2)
         {
+            Console.WriteLine("Verse Range enter");
+            Console.WriteLine($"{language}/books/{book}/chapters/{chapter}/verses/{v1}? to={v2}");
+            
             var query = $@"MATCH (n:Book:{book}:{language}) where n.book = '{book}'
               match (n)<-[r:CONTAINS]->(ch:Chapter)-[:CONTAINS]->(v:Verse) 
               where ch.num = {chapter} and v.verse >= {v1} and v.verse <= {v2}
