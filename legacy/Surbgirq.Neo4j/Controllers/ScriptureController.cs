@@ -42,6 +42,7 @@ namespace Surbgirq.GraphApi.Controllers
             return Content(str, "application/json");
         }
 
+        // curl -X GET "http://192.0.2.10:33010/Scripture/books" -H "accept: */*"
         [HttpGet("books")]
         public async Task<ContentResult> getBooks()
         {

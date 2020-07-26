@@ -22,7 +22,7 @@ namespace Surbgirq.TeleBot.Services
             Client = new TelegramBotClient(_config.BotToken);
 
         
-            Client.SetWebhookAsync("https://56961dc56c81.ngrok.io:8443/WebHook").Wait();
+            Client.SetWebhookAsync($"https://bot.datasfer.com/{_config.BotToken}/WebHook").Wait();
 
 #endif
 

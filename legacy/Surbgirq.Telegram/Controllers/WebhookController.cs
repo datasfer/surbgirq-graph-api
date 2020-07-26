@@ -25,11 +25,18 @@ namespace Surbgirq.TeleBot.Controllers
             _updateService = updateService;
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Post([FromBody] Update update)
+        [HttpPost("update")]
+        public async Task<IActionResult> Update([FromBody] Update update)
         {
+            Console.WriteLine(update.ToString());
             await _updateService.EchoAsync(update);
             return Ok();
+        }
+        
+        [HttpGet("getTest")]
+        public IActionResult getTest()
+        {
+                return Ok();
         }
     }
 }

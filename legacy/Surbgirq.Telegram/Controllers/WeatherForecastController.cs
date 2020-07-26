@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Surbgirq.TeleBot.Services;
 
 namespace Surbgirq.TeleBot.Controllers
 {
@@ -22,8 +23,14 @@ namespace Surbgirq.TeleBot.Controllers
         {
             _logger = logger;
         }
+        [HttpGet("getTest")]
+        public IActionResult getTest()
+        {
+        Console.WriteLine("getTest");
+                return Ok();
+        }
 
-        [HttpGet]
+        [HttpGet("get")]
         public IEnumerable<WeatherForecast> Get()
         {
             var rng = new Random();
