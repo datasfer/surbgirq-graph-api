@@ -152,7 +152,7 @@ namespace Surbgirq.GraphApi.Controllers
 
 
         /// Verse range
-        [HttpGet("books/{language}/{book}/chapters/{chapter}/verses/{v1}/")]
+        [HttpGet("{language}/books/{book}/chapters/{chapter}/verses/{v1}/")]
         public async Task<ContentResult> getVerseRange(string language, string book, int chapter, int v1, int v2)
         {
             var query = $@"MATCH (n:Book:{book}:{language}) where n.book = '{book}'
