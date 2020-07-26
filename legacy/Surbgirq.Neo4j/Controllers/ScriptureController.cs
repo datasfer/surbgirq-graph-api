@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 namespace Surbgirq.GraphApi.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("scripture")]
     public class ScriptureController : Controller
     {
         IDriver _driver;
@@ -43,16 +43,58 @@ namespace Surbgirq.GraphApi.Controllers
         }
 
         // curl -X GET "http://192.0.2.10:33010/Scripture/books" -H "accept: */*"
+        // curl -X GET "http://localhost:33010/Scripture/books" -H "accept: */*"
         [HttpGet("books")]
         public async Task<ContentResult> getBooks()
         {
             var query = "match (b:Book) return b;";
             var str = await getQueryJson(query);
             return Content(str, "application/json");
-            
+        }
+        
+
+        [HttpGet("books/language/{language}")]
+        public async Task<ContentResult> getBooksByLanguage(string language)
+        {
+            var query = $"match (b:Book:{language}) return b;";
+            var str = await getQueryJson(query);
+            return Content(str, "application/json");
         }
 
-        [HttpGet("book/chapters")]
+        [HttpGet("books/new")]
+        public async Task<ContentResult> getBooksNewTestament()
+        {
+            var query = $"match (b:Book:New) where b.testament = 'New' return b;";
+            var str = await getQueryJson(query);
+            return Content(str, "application/json");
+        }
+
+        [HttpGet("books/old")]
+        public async Task<ContentResult> getBooksOldTestament()
+        {
+            var query = $"match (b:Book:Old) where b.testament = 'Old' return b;";
+            var str = await getQueryJson(query);
+            return Content(str, "application/json");
+        }
+
+        [HttpGet("books/{book}")]
+        public async Task<ContentResult> getBook(string book)
+        {
+            var query = $"match (b:Book) where b.book = '{book}' return b;";
+            var str = await getQueryJson(query);
+            return Content(str, "application/json");
+        }
+
+        [HttpGet("books/{language}/{book}")]
+        public async Task<ContentResult> getBook(string language, string book)
+        {
+            var query = $"match (b:Book:{language}) where b.book = '{book}' return b;";
+            var str = await getQueryJson(query);
+            return Content(str, "application/json");
+        }
+
+       
+        [HttpGet("books/{book}/chapters")]
         public async Task<ContentResult> getBookChaptersCount(string book)
         {
             
@@ -62,11 +104,11 @@ namespace Surbgirq.GraphApi.Controllers
             return Content(res, "application/json");
         }
 
-        [HttpGet("book/{girq}/chapter/{ch_num}/sections")]
-        public async Task<ContentResult> getBookChapterSections(string girq, int ch_num)
+        [HttpGet("books/{girq}/chapters/{num}/sections")]
+        public async Task<ContentResult> getBookChapterSections(string girq, int num)
         {
 
-            var query = $"match (b:Book {{book: '{girq}' }})-[:CONTAINS]-()-[*]->(s:Section) WHERE s.chapter={ch_num} " +
+            var query = $"match (b:Book {{book: '{girq}' }})-[:CONTAINS]-()-[*]->(s:Section) WHERE s.chapter={num} " +
                 $"return s.num as num, s.title as title, b.book as book  " +
                 $"order by s.num;";
          
@@ -91,6 +133,35 @@ namespace Surbgirq.GraphApi.Controllers
             var str =  await getQueryJson(query);
             return Content(str, "application/json");
 
+        }
+
+
+
+        /// Verses
+        [HttpGet("books/{book}/chapters/{chapter}/verses/{verse}")]
+        public async Task<ContentResult> getVerse(string book, int chapter, int verse, string language)
+        {
+            var query = $@"MATCH (n:Book:{book}:{language}) where n.book = '{book}'
+              match (n)<-[r:CONTAINS]->(ch:Chapter)-[:CONTAINS]->(v:Verse) 
+              where ch.num = {chapter} and v.verse = {verse}
+              return v";
+
+            var str = await getQueryJson(query);
+            return Content(str, "application/json");
+        }
+
+
+        /// Verse range
+        [HttpGet("books/{book}/chapters/{chapter}/verses/{v1}/to/{v2}")]
+        public async Task<ContentResult> getVerseRange(string book, int chapter, int v1, int v2, string language)
+        {
+            var query = $@"MATCH (n:Book:{book}:{language}) where n.book = '{book}'
+              match (n)<-[r:CONTAINS]->(ch:Chapter)-[:CONTAINS]->(v:Verse) 
+              where ch.num = {chapter} and v.verse >= {v1} and v.verse <= {v2}
+              return v";
+
+            var str = await getQueryJson(query);
+            return Content(str, "application/json");
         }
 
         /// <summary>
