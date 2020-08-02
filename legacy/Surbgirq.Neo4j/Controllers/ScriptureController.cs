@@ -138,12 +138,12 @@ namespace Surbgirq.GraphApi.Controllers
 
 
         /// Verses
-        [HttpGet("books/{book}/chapters/{chapter}/verses/{verse}")]
-        public async Task<ContentResult> getVerse(string book, int chapter, int verse, string language)
+        [HttpGet("{language}/books/{book}/chapters/{chapter}/oneverse/{verseNum}/")]
+        public async Task<ContentResult> getVerse(string language, string book, int chapter, int verseNum)
         {
             var query = $@"MATCH (n:Book:{book}:{language}) where n.book = '{book}'
               match (n)<-[r:CONTAINS]->(ch:Chapter)-[:CONTAINS]->(v:Verse) 
-              where ch.num = {chapter} and v.verse = {verse}
+              where ch.num = {chapter} and v.verse = {verseNum}
               return v";
 
             var str = await getQueryJson(query);
@@ -161,12 +161,41 @@ namespace Surbgirq.GraphApi.Controllers
             var query = $@"MATCH (n:Book:{book}:{language}) where n.book = '{book}'
               match (n)<-[r:CONTAINS]->(ch:Chapter)-[:CONTAINS]->(v:Verse) 
               where ch.num = {chapter} and v.verse >= {v1} and v.verse <= {v2}
-              return v";
+              return v order by v.verse";
 
             var str = await getQueryJson(query);
             return Content(str, "application/json");
         }
 
+
+
+        /// Chapter's  titles
+        [HttpGet("{language}/books/{book}/chapters/{chapter}/titles/")]
+        public async Task<ContentResult> getChapterTitles(string language, string book, int chapter)
+        {
+            var query = $@"MATCH (n:Book:{book}:{language}) where n.book = '{book}'
+            MATCH (n)-[r:CONTAINS]-(ch:Chapter)-[r1:CONTAINS*]->(sec:Section)
+            where ch.num = {chapter} 
+            return ch, sec order by ch.num, sec.num";           
+Console.WriteLine(query);
+            
+            var str = await getQueryJson(query);
+            return Content(str, "application/json");
+        }
+
+      /*  [HttpGet("{language}/books/{book}/chapters/{chapter}/sections/{section}")]
+        public async Task<ContentResult> getChapterTitles(string language, string book, int chapter)
+        {
+            var query = $@"MATCH (n:Book:{book}:{language}) where n.book = '{book}'
+            MATCH (n:Book:Matthew:Ashxarhabar)-[r:CONTAINS]-(ch:Chapter)-[r1:CONTAINS*]->(sec:Section)
+            where ch.num = {chapter} 
+            return ch.title, sec.title order by ch.num, sec.num";           
+
+            Console.WriteLine(query);
+            var str = await getQueryJson(query);
+            return Content(str, "application/json");
+        }
+*/
         /// <summary>
         /// converting to json cypher output
         /// </summary>
@@ -175,6 +204,7 @@ namespace Surbgirq.GraphApi.Controllers
         private async Task<string> getQueryJson(string query)
         {
             var jsonString = await _graphRepository.RunQuery(query);
+            Console.WriteLine(jsonString);
             return toJsonPropsArr(jsonString);
             
         }
