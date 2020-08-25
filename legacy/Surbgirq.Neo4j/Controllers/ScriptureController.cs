@@ -61,7 +61,7 @@ namespace Surbgirq.GraphApi.Controllers
             
             var jsonString = (await _graphRepository.RunQuery(query)).ToList();
 
-            var res = toJsonPropsArr(jsonString);
+            var res = singleValue(jsonString);
             return Content(res, "application/json");
         }
 
@@ -327,6 +327,24 @@ namespace Surbgirq.GraphApi.Controllers
             }
             var str = res.Aggregate("", (a, b) => $"{a},{b}").Trim(',');
             return $"{str}";
+        }
+
+
+        private static string singleValue(IEnumerable<IDictionary<string, object>> jsonString)
+        {
+            List<JObject> res = new List<JObject>();
+
+            var item = jsonString.FirstOrDefault();
+            string result = "0";
+            if (item != null)
+            {
+                var k = item.Values.FirstOrDefault();
+                if (k != null)
+                {
+                    result = k.ToString();
+                }
+            }
+            return result;
         }
 
 
