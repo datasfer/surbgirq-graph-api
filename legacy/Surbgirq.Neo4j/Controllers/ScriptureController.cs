@@ -200,9 +200,10 @@ namespace Surbgirq.GraphApi.Controllers
         [HttpGet("{language}/books/{book}/chapters/{chapter}/verses/{v1}/")]
         public async Task<ContentResult> getVerseRange(string language, string book, int chapter, int v1, int v2)
         {
-            Console.WriteLine("Verse Range enter");
-            Console.WriteLine($"{language}/books/{book}/chapters/{chapter}/verses/{v1}? to={v2}");
-            
+            Console.WriteLine("-----------------------------------");
+            Console.WriteLine("Request: Verse Range enter");
+            Console.WriteLine($"URL: {language}/books/{book}/chapters/{chapter}/verses/{v1}? to={v2}");
+
             var query = $@"MATCH (n:Book:{book}:{language}) where n.book = '{book}'
               match (n)<-[r:CONTAINS]->(ch:Chapter)-[:CONTAINS]->(v:Verse) 
               where ch.num = {chapter} and v.verse >= {v1} and v.verse <= {v2}
@@ -278,6 +279,7 @@ namespace Surbgirq.GraphApi.Controllers
         /// <returns></returns>
         private async Task<string> getQueryJson(string query)
         {
+            Console.WriteLine(query);
             var jsonString = await _graphRepository.RunQuery(query);
             Console.WriteLine(jsonString);
             return toJsonPropsArr(jsonString);
