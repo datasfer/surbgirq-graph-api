@@ -66,19 +66,7 @@ namespace Surbgirq.GraphApi.Controllers
         }
 
 
-        [HttpGet("translation/{translation}/books")]
-        public async Task<ContentResult> getBooksByTranslation(string translation)
-        {
-            var query = $"MATCH(t: Translation) " +
-                $"where t.id = '{translation}' " +
-                "MATCH(t) - [r:CONTAINS] -> (b: Book)" +
-                "MATCH(b) - [r:CONTAINS] -> (ch: Chapter)" +
-                "return b.chapters as chapterNum, b.book, ch.num;";
- 
-            var jsonString = (await _graphRepository.RunQuery(query)).ToList();
-            var res = toJsonProps(jsonString);
-            return Content($"[{res}]", "application/json");
-        }
+      
 
 
         [HttpGet("books/{book}/chapters")]
@@ -137,10 +125,26 @@ namespace Surbgirq.GraphApi.Controllers
             return Content(str, "application/json");
         }
 
-        [HttpGet("books/language/{language}")]
-        public async Task<ContentResult> getBooksByLanguage(string language)
+
+        //[HttpGet("translation/{translation}/books")]
+        //public async Task<ContentResult> getBooksByTranslation(string translation)
+        //{
+        //    var query = $"MATCH(t:Translation) where t.id='{translation}'\n" +
+        //        "MATCH(t)-[r:CONTAINS]->(b:Book)\n" +
+        //        "return b;";
+
+        //    var jsonString = (await _graphRepository.RunQuery(query)).ToList();
+        //    var res = toJsonProps(jsonString);
+        //    return Content($"[{res}]", "application/json");
+        //}
+
+        [HttpGet("translation/{translation}/books")]
+        public async Task<ContentResult> getBooksByTranslation(string translation)
         {
-            var query = $"match (b:Book:{language}) return b;";
+            var query = $@"MATCH(t:Translation) where t.id = '{translation}' 
+                          MATCH(t)-[rt:CONTAINS]->(n:Book)
+                          return n;";
+            
             var str = await getQueryJson(query);
             return Content(str, "application/json");
         }
@@ -169,10 +173,12 @@ namespace Surbgirq.GraphApi.Controllers
             return Content(str, "application/json");
         }
 
-        [HttpGet("books/{language}/{book}")]
-        public async Task<ContentResult> getBook(string language, string book)
+        [HttpGet("translation/{translation}/books/{book}")]
+        public async Task<ContentResult> getBook(string translation, string book)
         {
-            var query = $"match (b:Book:{language}) where b.book = '{book}' return b;";
+            var query = $@"MATCH(t:Translation) where t.id = '{translation}' 
+                          MATCH(t)-[r:CONTAINS]->(b:Book) where b.book = '{book}'
+                          return b;";
             var str = await getQueryJson(query);
             return Content(str, "application/json");
         }
@@ -183,10 +189,11 @@ namespace Surbgirq.GraphApi.Controllers
         #region Verses
 
         /// Verses
-        [HttpGet("{language}/books/{book}/chapters/{chapter}/oneverse/{verseNum}/")]
-        public async Task<ContentResult> getVerse(string language, string book, int chapter, int verseNum)
+        [HttpGet("{translation}/books/{book}/chapters/{chapter}/oneverse/{verseNum}/")]
+        public async Task<ContentResult> getVerse(string translation, string book, int chapter, int verseNum)
         {
-            var query = $@"MATCH (n:Book:{book}:{language}) where n.book = '{book}'
+            var query = $@"MATCH(t:Translation) where t.id = '{translation}' 
+                           MATCH(t)-[rt:CONTAINS]->(n:Book) where n.book = '{book}'
               match (n)<-[r:CONTAINS]->(ch:Chapter)-[:CONTAINS]->(v:Verse) 
               where ch.num = {chapter} and v.verse = {verseNum}
               return v";
@@ -197,14 +204,15 @@ namespace Surbgirq.GraphApi.Controllers
 
 
         /// Verse range
-        [HttpGet("{language}/books/{book}/chapters/{chapter}/verses/{v1}/")]
-        public async Task<ContentResult> getVerseRange(string language, string book, int chapter, int v1, int v2)
+        [HttpGet("{translation}/books/{book}/chapters/{chapter}/verses/{v1}/")]
+        public async Task<ContentResult> getVerseRange(string translation, string book, int chapter, int v1, int v2)
         {
             Console.WriteLine("-----------------------------------");
             Console.WriteLine("Request: Verse Range enter");
-            Console.WriteLine($"URL: {language}/books/{book}/chapters/{chapter}/verses/{v1}? to={v2}");
-
-            var query = $@"MATCH (n:Book:{book}:{language}) where n.book = '{book}'
+            Console.WriteLine($"URL: {translation}/books/{book}/chapters/{chapter}/verses/{v1}? to={v2}");
+ 
+            var query = $@"MATCH(t:Translation) where t.id = '{translation}' 
+                           MATCH(t)-[rt:CONTAINS]->(n:Book) where n.book = '{book}'
               match (n)<-[r:CONTAINS]->(ch:Chapter)-[:CONTAINS]->(v:Verse) 
               where ch.num = {chapter} and v.verse >= {v1} and v.verse <= {v2}
               return v order by v.verse";
@@ -216,10 +224,11 @@ namespace Surbgirq.GraphApi.Controllers
 
 
         /// Chapter's  sections
-        [HttpGet("{language}/books/{book}/chapters/{chapter}/sections/")]
-        public async Task<ContentResult> getChapterTitles(string language, string book, int chapter)
+        [HttpGet("{translation}/books/{book}/chapters/{chapter}/sections/")]
+        public async Task<ContentResult> getChapterTitles(string translation, string book, int chapter)
         {
-            var query = $@"MATCH (n:Book:{book}:{language}) where n.book = '{book}'
+            var query = $@"MATCH(t:Translation) where t.id = '{translation}' 
+                           MATCH(t)-[rt:CONTAINS]->(n:Book) where n.book = '{book}'
             MATCH (n)-[r:CONTAINS]-(ch:Chapter)-[r1:CONTAINS*]->(sec:Section)
             where ch.num = {chapter} 
             return sec order by ch.num, sec.num";           
@@ -230,11 +239,12 @@ namespace Surbgirq.GraphApi.Controllers
 
 
         /// Chapter's concret  sections
-        [HttpGet("{language}/books/{book}/chapters/{chapter}/sections/{secnum}")]
-        public async Task<ContentResult> getChapterTitles(string language, string book, int chapter, int secnum)
+        [HttpGet("{translation}/books/{book}/chapters/{chapter}/sections/{secnum}")]
+        public async Task<ContentResult> getChapterTitles(string translation, string book, int chapter, int secnum)
         {
-            var query = $@"MATCH (n:Book:{book}:{language}) where n.book = '{book}'
-            MATCH (n)-[r:CONTAINS]-(ch:Chapter)-[r1:CONTAINS*]->(sec:Section)
+            var query = $@"MATCH(t:Translation) where t.id = '{translation}'
+                           MATCH(t)-[rt: CONTAINS]->(n: Book) where n.book = '{book}'
+            MATCH(n)-[r:CONTAINS]-(ch:Chapter)-[r1:CONTAINS*]->(sec:Section)
             where ch.num = {chapter} and sec.num = {secnum}
             return sec order by ch.num, sec.num";           
 
@@ -245,11 +255,12 @@ namespace Surbgirq.GraphApi.Controllers
 
 
         /// Book sections
-        [HttpGet("{language}/books/{book}/sections")]
-        public async Task<ContentResult> getBookSections(string language, string book)
+        [HttpGet("{translation}/books/{book}/sections")]
+        public async Task<ContentResult> getBookSections(string translation, string book)
         {
-            var query = $@"MATCH (n:Book:{book}:{language}) where n.book = '{book}'
-            MATCH (n)-[r:CONTAINS]-(ch:Chapter)-[r1:CONTAINS*]->(sec:Section)
+            var query = $@"MATCH(t:Translation) where t.id = '{translation}'
+                           MATCH(t)-[rt: CONTAINS]->(n: Book) where n.book = '{book}'
+            MATCH(n)-[r:CONTAINS]-(ch:Chapter)-[r1:CONTAINS*]->(sec:Section)
             return sec order by ch.num, sec.num";           
 
             var str = await getQueryJson(query);
