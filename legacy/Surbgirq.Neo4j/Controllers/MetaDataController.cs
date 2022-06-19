@@ -53,9 +53,11 @@ namespace Surbgirq.GraphApi.Controllers
         [HttpGet("book/{girq}/chapter/{ch_num}/verses/count")]
         public async Task<ContentResult> getBookChapterVerseCount(string girq, int ch_num)
         {
-            var query = $"match (b:Book {{book: '{girq}' }})-[:CONTAINS]-()-[*]->(v:Verse) WHERE v.chapter={ch_num} " +
+            var query =
+                $"match (b:Book {{book: '{girq}' }})-[:CONTAINS]-()-[*]->(v:Verse) WHERE v.chapter={ch_num} " +
                 $"return Max(v.verse) as num";
-            
+
+            Console.WriteLine(query);
             var jsonString = (await _graphRepository.RunQuery(query)).ToList();
 
             var res = toJsonPropsArr(jsonString);
@@ -88,7 +90,10 @@ namespace Surbgirq.GraphApi.Controllers
         [HttpGet("books/{book}/chapters")]
         public async Task<ContentResult> getBookChaptersCount(string book)
         {
-            
+
+            // MATCH(t:Translation) 
+            // MATCH(t)-[rt:CONTAINS]->(b:Book) where t.id = 'e1994-T' and b.book = 'Matthew'
+            // return b.chapters;
             var query = $"match (b:Book) where b.book = '{book}' return b.chapters as num;";
             var jsonString = (await _graphRepository.RunQuery(query)).ToList();
             var res = toJsonProps(jsonString);

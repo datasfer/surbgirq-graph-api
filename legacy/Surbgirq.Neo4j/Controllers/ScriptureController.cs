@@ -138,12 +138,12 @@ namespace Surbgirq.GraphApi.Controllers
         //    return Content($"[{res}]", "application/json");
         //}
 
-        [HttpGet("translation/{translation}/books")]
+        [HttpGet("{translation}/books")]
         public async Task<ContentResult> getBooksByTranslation(string translation)
         {
             var query = $@"MATCH(t:Translation) where t.id = '{translation}' 
                           MATCH(t)-[rt:CONTAINS]->(n:Book)
-                          return n;";
+                          return n, t.id as translation;";
             
             var str = await getQueryJson(query);
             return Content(str, "application/json");
@@ -196,7 +196,7 @@ namespace Surbgirq.GraphApi.Controllers
                            MATCH(t)-[rt:CONTAINS]->(n:Book) where n.book = '{book}'
               match (n)<-[r:CONTAINS]->(ch:Chapter)-[:CONTAINS]->(v:Verse) 
               where ch.num = {chapter} and v.verse = {verseNum}
-              return v";
+              return v, t.id as translation, n.title as bookTitle order by v.verseOrder";
 
             var str = await getQueryJson(query);
             return Content(str, "application/json");
@@ -209,13 +209,13 @@ namespace Surbgirq.GraphApi.Controllers
         {
             Console.WriteLine("-----------------------------------");
             Console.WriteLine("Request: Verse Range enter");
-            Console.WriteLine($"URL: {translation}/books/{book}/chapters/{chapter}/verses/{v1}? to={v2}");
+            Console.WriteLine($"URL: scripture/{translation}/books/{book}/chapters/{chapter}/verses/{v1}? to={v2}");
  
             var query = $@"MATCH(t:Translation) where t.id = '{translation}' 
                            MATCH(t)-[rt:CONTAINS]->(n:Book) where n.book = '{book}'
               match (n)<-[r:CONTAINS]->(ch:Chapter)-[:CONTAINS]->(v:Verse) 
               where ch.num = {chapter} and v.verse >= {v1} and v.verse <= {v2}
-              return v order by v.verse";
+              return v, t.id as translation, n.title as bookTitle order by v.verseOrder";
 
             var str = await getQueryJson(query);
             return Content(str, "application/json");
