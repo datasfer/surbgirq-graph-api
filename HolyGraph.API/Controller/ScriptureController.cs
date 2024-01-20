@@ -12,13 +12,12 @@ namespace HolyGraph.API.Controllers;
 public class ScriptureController : BaseApiController
 {
     private readonly INeo4jGraphRepository _grapthRepository;
-    private readonly IDriver _driver;
+    private readonly ILogger<ScriptureController> _logger;
 
-    public ScriptureController(INeo4jGraphRepository grapthRepository)
+    public ScriptureController(INeo4jGraphRepository grapthRepository, ILogger<ScriptureController> logger)
     {
         _grapthRepository = grapthRepository;
-        //_driver = GraphDatabase.Driver("bolt://localhost:7687", AuthTokens.Basic("neo4j", "CHANGE_ME"));
-        _driver = GraphDatabase.Driver("bolt://192.0.2.10:7687", AuthTokens.Basic("neo4j", "CHANGE_ME"));
+        _logger = logger;
     }
 
     #region Meta information
@@ -161,6 +160,7 @@ public class ScriptureController : BaseApiController
         catch (Exception ex)
         {
             // Log the exception
+            _logger.LogError(ex, @"Failed on when running query {query}");
             Console.WriteLine($"Error: {ex.Message}");
             return StatusCode(500, "Internal Server Error");
         }
