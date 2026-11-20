@@ -1,0 +1,31 @@
+# Webhook registration
+
+1. Create "data.json"
+{
+  "url": "https://bots.domain.tld/api/v1/echo"
+}
+
+2. Set hook
+curl -X POST -d @data.json -H "Content-Type: application/json" "https://api.telegram.org/botYOURBOTTOKEN/setWebhook"
+
+
+
+# ngrok
+ngrok http -host-header=localhost 63459
+
+
+# reverse proxy and ssl
+https://www.scaleway.com/en/docs/how-to-configure-nginx-reverse-proxy/
+
+
+# systemd for net core api
+https://swimburger.net/blog/dotnet/how-to-run-aspnet-core-as-a-service-on-linux
+https://swimburger.net/blog/dotnet/how-to-run-a-dotnet-core-console-app-as-a-service-using-systemd-on-linux
+
+
+# Telegram API
+
+https://core.telegram.org/bots/webhooks
+
+1. getMe
+https://api.telegram.org/"bot" + mytoken/getMe
