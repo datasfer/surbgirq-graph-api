@@ -4,6 +4,11 @@
 ## Get latest from `dotnet new gitignore`
 
 elm-client/elm-stuff/*
+# The compiled Elm client (npm run dev, in elm-client/, builds it):
+elm-client/index.js
+
+# The Angular dev server's HTTPS certificate and key; create your own (see client/README.md):
+client/ssl/
 
 # Private data, never committed: book metadata of the 1994 Etchmiadzin translation (copyrighted; see README, "Data")
 HolyGraph.API/Data/YAML/e1994T/
