@@ -5,6 +5,9 @@
 
 elm-client/elm-stuff/*
 
+# Private data, never committed: book metadata of the 1994 Etchmiadzin translation (copyrighted; see README, "Data")
+HolyGraph.API/Data/YAML/e1994T/
+
 .mono/
 
 # dotenv files

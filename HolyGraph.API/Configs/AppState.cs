@@ -6,23 +6,32 @@ namespace HolyGraph.API;
 
 public class AppState
 {
+    // Book metadata (chapter and verse counts, abbreviations) of the 1994 Etchmiadzin translation.
+    // The files are copyrighted, so they are not in this repository (see README, "Data"). Put them in
+    // HolyGraph.API/Data/YAML/e1994T/New (git-ignored); the build copies them next to the app.
+    // Without them the API still starts, and uses default chapter and verse counts.
+    private const string MetadataFolder = "Data/YAML/e1994T/New";
+
     public AppState()
     {
         var deserializer = new DeserializerBuilder()
             .WithNamingConvention(new CamelCaseNamingConvention())
             .Build();
 
-        Books = 
-        [
-            deserializer.Deserialize<Book>(File.OpenText(@"./Data/YAML/e1994T/New/01.Matthew.yaml")),
-            deserializer.Deserialize<Book>(File.OpenText(@"./Data/YAML/e1994T/New/02.Mark.yaml")),
-            deserializer.Deserialize<Book>(File.OpenText(@"./Data/YAML/e1994T/New/03.Luke.yaml")),
-            deserializer.Deserialize<Book>(File.OpenText(@"./Data/YAML/e1994T/New/04.John.yaml")),
-            deserializer.Deserialize<Book>(File.OpenText(@"./Data/YAML/e1994T/New/05.Acts.yaml")),
-            deserializer.Deserialize<Book>(File.OpenText(@"./Data/YAML/e1994T/New/06.Romans.yaml")),
-            deserializer.Deserialize<Book>(File.OpenText(@"./Data/YAML/e1994T/New/07.1_Corinthians.yaml")),
-            deserializer.Deserialize<Book>(File.OpenText(@"./Data/YAML/e1994T/New/08.2_Corinthians.yaml")),
-        ];
+        var folder = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, MetadataFolder));
+        Books = [];
+        if (Directory.Exists(folder))
+        {
+            foreach (var file in Directory.GetFiles(folder, "*.yaml").Order(StringComparer.Ordinal))
+            {
+                using var reader = File.OpenText(file);
+                Books.Add(deserializer.Deserialize<Book>(reader));
+            }
+        }
+
+        Console.WriteLine(Books.Count > 0
+            ? $"Book metadata: {Books.Count} books from {folder}"
+            : $"No book metadata in {folder}; using default chapter and verse counts.");
     }
 
     public List<Book> Books {get; private set;}

@@ -1,6 +1,5 @@
 ﻿
 using HolyGraph.API.Interfaces;
-using HolyGraph.API.Models;
 
 namespace HolyGraph.API;
 

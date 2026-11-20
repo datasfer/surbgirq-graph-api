@@ -28,7 +28,8 @@
 </ItemGroup>
 
   <ItemGroup>
-  <None Update="Data/YAML/e1994T/New/01.Matthew.yaml">
+  <!-- Private book metadata (git-ignored, see README "Data"): copy every YAML file, for run and publish -->
+  <None Update="Data/YAML/**/*.yaml">
     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
   </None>
 </ItemGroup>
