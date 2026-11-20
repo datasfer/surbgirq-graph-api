@@ -1,27 +1,64 @@
-# HolyGraphClient
+# HolyGraph web client (Angular)
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 16.2.11.
+The web UI of [HolyGraph](../README.md): read the Bible chapter by chapter, and browse the Classical Armenian word roots and
+their word forms. Angular 16 with Bootstrap 5; it was generated with Angular CLI 16.2.11.
 
-## Development server
+## Pages
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+| Page | What it shows |
+|---|---|
+| **Scriptures** (`/books`) | Pick a translation, a book and a chapter, then read the verses. "With Sections" groups them under their section titles. Previous and next chapter buttons; optional paging. |
+| **Armats** (`/armats`, `/armats/:letter`) | The word roots, filtered by first letter with an alphabet bar; paged |
+| **Word forms** (`/armat-tokens/:armat`) | Every form of one root, with its grammar tags |
+| Home, Tokens, book detail | Stubs ("… works!") |
 
-## Code scaffolding
+The navigation bar still has a few items from the Bootstrap template.
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+## Requirements
 
-## Build
+- **Node.js:** Angular 16 officially supports Node.js 16.14+ and 18.10+. Newer Node versions haven't been tried with this
+  client.
+- **The HolyGraph API**, running; see the [root README](../README.md).
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+## Install
 
-## Running unit tests
+```bash
+cd client
+npm ci
+```
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+## The development certificate
 
-## Running end-to-end tests
+`ng serve` uses HTTPS: `angular.json` sets `"ssl": true`, with `ssl/localhost.pem` and `ssl/localhost-key.pem`. The
+certificate isn't in the repository (`client/ssl/` is git-ignored), so create your own, for example with
+[mkcert](https://github.com/FiloSottile/mkcert):
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
+```bash
+mkcert -install      # once: trust mkcert's local certificate authority
+mkdir -p ssl
+mkcert -cert-file ssl/localhost.pem -key-file ssl/localhost-key.pem localhost 127.0.0.1
+```
 
-## Further help
+## The API address
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+- **Development:** `apiUrl` in `src/environments/environment.development.ts`. It ships with a placeholder (a documentation
+  address); set it to your API, for example `http://localhost:33010/api/`.
+- **Production build:** `src/environments/environment.ts` uses the relative `api/`, for a client served from the same host
+  as the API.
+- `src/app/app.component.ts` also has a hard-coded `host` for one request.
+
+The dev page runs on HTTPS. Browsers let it call an API on `http://localhost`, but block plain-HTTP calls to other hosts
+(mixed content). So use a local API, or one served over HTTPS.
+
+## Run and build
+
+```bash
+npm start            # ng serve: https://localhost:4200
+npm run build        # into dist/
+```
+
+## Known issues
+
+- Angular 16 is out of support; an upgrade is planned when the project runs again.
+- The default translation is `e1994-T`, which isn't public (see the root README, "Data"). Pick another one in the list.
+- The hard-coded `host` in `app.component.ts`, and the stub pages above.
