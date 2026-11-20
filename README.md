@@ -5,8 +5,8 @@ translations, the King James Version, and Bible metadata: people, places, events
 The graph also holds a lexicon of Classical Armenian word roots (*armat*) and their word forms.
 
 *Surb Girq* (Սուրբ Գիրք) is Armenian for "Holy Book"; HolyGraph is the English name of the project's 2024 API rewrite.
-The Telegram bot and the data pipeline that builds the graph live in a separate repository, `surbgirq` (Haskell), which will
-be published too.
+The Telegram bot and the data pipeline that builds the graph live in a separate repository,
+[`datasfer/surbgirq`](https://github.com/datasfer/surbgirq) (Haskell).
 
 **Status:** the API builds and starts on .NET 8 (checked in November 2026). It hasn't been run against a current Neo4j
 version yet. Read [Known issues / security](#known-issues--security) before exposing it anywhere.
@@ -88,7 +88,7 @@ npm run dev          # elm-live compiles index.js and serves index.html, with li
 ## Data
 
 - **This repository holds code only.** The API reads the Surbgirq graph from Neo4j. The graph is built by the data pipeline
-  in `surbgirq`, not here.
+  in `surbgirq` ([docs/data-pipeline.md](https://github.com/datasfer/surbgirq/blob/master/docs/data-pipeline.md)), not here.
 - **The graph combines:**
   - Armenian Bible texts: Classical Armenian (Grabar) editions and a modern translation;
   - the King James Version;
@@ -96,7 +96,8 @@ npm run dev          # elm-live compiles index.js and serves index.html, with li
   - Theographic Bible Metadata: people, places, events, years, and Easton's Bible Dictionary (CC BY-SA 4.0);
   - a Classical Armenian lexicon: word roots (*armat*) and their word forms.
 
-  The sources and licences of the data are documented with the data, not here.
+  The sources and licences of the data are listed in `surbgirq`'s
+  [docs/data-sources.md](https://github.com/datasfer/surbgirq/blob/master/docs/data-sources.md).
 - **The 1994 Etchmiadzin translation is not public:** not in this repository and not in its history. It's copyrighted by the
   Mother See of Holy Etchmiadzin and the Bible Society of Armenia, and so are its section headings. The code still knows its
   translation ID, `e1994-T` (the web client's default), because a private graph may contain it.
