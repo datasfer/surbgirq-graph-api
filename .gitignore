@@ -15,8 +15,10 @@ HolyGraph.API/Data/YAML/e1994T/
 
 .mono/
 
-# dotenv files
+# Local settings and secrets, never committed (see "Secrets" in README.md)
 .env
+.env.*
+!.env.example
 
 # User-specific files
 *.rsuser

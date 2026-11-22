@@ -1,0 +1,2 @@
+# The pre-commit hook is a shell script: keep it LF on every checkout, even with core.autocrlf=true
+.githooks/* text eol=lf

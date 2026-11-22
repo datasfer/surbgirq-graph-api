@@ -37,8 +37,9 @@ You need the .NET 8 SDK (or a later SDK) and a Neo4j database with the Surbgirq 
    }
    ```
 
-   Put your values there, or override them with environment variables: `Neo4jConfig__InstanceUri`,
-   `Neo4jConfig__UserName`, `Neo4jConfig__Password`. (The database name is hard-coded for now; see Known issues.)
+   Keep those placeholders in the file, and set your values in environment variables: `Neo4jConfig__InstanceUri`,
+   `Neo4jConfig__UserName`, `Neo4jConfig__Password` (see [Secrets](#secrets)). (The database name is hard-coded for now; see
+   Known issues.)
 2. **Run it:**
 
    ```bash
@@ -84,6 +85,33 @@ cd elm-client
 npm install
 npm run dev          # elm-live compiles index.js and serves index.html, with live reload
 ```
+
+## Secrets
+
+No secret is committed. `appsettings*.json` keep the placeholder `CHANGE_ME`; the real Neo4j settings come from environment
+variables (`Neo4jConfig__Password` and the others; see [Run the API](#run-the-api)). Files named `.env` and `.env.*` are
+git-ignored, except `.env.example`.
+
+**A pre-commit hook** in [`.githooks/`](.githooks/pre-commit) stops a commit when a staged file contains anything
+[gitleaks](https://github.com/gitleaks/gitleaks) finds, a Telegram bot token in any form, or a literal password in a config
+file. Turn it on once per clone:
+
+```bash
+git config core.hooksPath .githooks
+```
+
+It needs gitleaks 8.19 or newer on your `PATH`: `winget install --id Gitleaks.Gitleaks --exact` on Windows,
+`brew install gitleaks` on macOS. On Linux, download `gitleaks_<version>_linux_x64.tar.gz` and
+`gitleaks_<version>_checksums.txt` from its [releases](https://github.com/gitleaks/gitleaks/releases), then:
+
+```bash
+sha256sum --ignore-missing -c gitleaks_*_checksums.txt
+tar -xzf gitleaks_*_linux_x64.tar.gz gitleaks
+install -D -m 755 gitleaks ~/.local/bin/gitleaks
+```
+
+The hook names the file and the line, never the value. On a false alarm, check twice, then commit once with
+`git commit --no-verify`.
 
 ## Data
 

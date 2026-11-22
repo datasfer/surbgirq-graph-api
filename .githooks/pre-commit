@@ -1,0 +1,70 @@
+#!/bin/sh
+# Pre-commit hook: keeps secrets out of the history.
+#
+#   Enable it once per clone:  git config core.hooksPath .githooks
+#   It needs gitleaks 8.19+:   see "Secrets" in README.md
+#
+# It stops the commit when a staged file contains:
+#   1. anything gitleaks finds;
+#   2. a Telegram bot token in any form (gitleaks' own rule only sees one next to the word "telegram");
+#   3. a literal password in a config file (JSON, YAML or env file), the way a Neo4j password once leaked.
+# It names the file and the line, never the value. On a false alarm, check twice, then: git commit --no-verify
+#
+# The same hook is in datasfer/surbgirq and datasfer/surbgirq-graph-api: keep the two copies identical.
+
+status=0
+
+staged=$(git -c core.quotePath=false diff --cached --name-only --diff-filter=ACMR)
+[ -n "$staged" ] || exit 0
+
+# Searches the staged version of the files listed on stdin, one per line; prints file:line:text.
+grep_staged() {
+    tr '\n' '\0' | xargs -0 git --literal-pathspecs grep --cached -n -I "$@" --
+}
+
+# report <what was found> <what to do> <file:line list>: prints to stderr. (No pipe into it: a function at
+# the end of a pipeline runs in a subshell, so the caller sets status itself.)
+report() {
+    echo "pre-commit: $1, at:" >&2
+    printf '%s\n' "$3" | sed 's/^/    /' >&2
+    echo "            $2" >&2
+}
+
+# 1. gitleaks, on the staged changes
+if command -v gitleaks >/dev/null 2>&1; then
+    if ! gitleaks git --pre-commit --staged --redact --verbose --no-banner --log-level warn; then
+        echo "pre-commit: gitleaks found a secret, or failed (see above; secrets are redacted)." >&2
+        status=1
+    fi
+else
+    echo "pre-commit: gitleaks isn't installed, so the commit stops here." >&2
+    echo "            Install it (see \"Secrets\" in README.md), then commit again." >&2
+    status=1
+fi
+
+# 2. Telegram bot tokens: the bot's ID, a colon, then 35 characters starting with A
+token_re='[0-9]{5,16}:A[A-Za-z0-9_-]{34}'
+found=$(printf '%s\n' "$staged" | grep_staged -E "$token_re" | cut -d: -f1,2)
+if [ -n "$found" ]; then
+    report "a Telegram bot token is staged" \
+        "Read it from the environment instead (see \"Secrets\" in README.md)." "$found"
+    status=1
+fi
+
+# 3. Literal passwords in config files: a password key with a value, or NEO4J_AUTH=neo4j/<password>.
+#    Placeholders pass: CHANGE_ME, ${VAR}, _env:VAR, <...>, and empty values.
+configs=$(printf '%s\n' "$staged" | grep -E '\.(json|ya?ml)$|(^|/)\.env(\..*)?$')
+if [ -n "$configs" ]; then
+    password_re="pass(word|wd)[^:=]{0,3}[[:space:]]*[:=][[:space:]]*[\"']?[^\"'[:space:],}]"
+    password_re="$password_re|neo4j_auth[[:space:]]*[:=][[:space:]]*[\"']?neo4j/[^\"'[:space:]]"
+    placeholder_re='CHANGE_ME|[$][{]|_env:|<[A-Za-z_ -]+>'
+    found=$(printf '%s\n' "$configs" | grep_staged -i -E "$password_re" \
+            | grep -v -E "$placeholder_re" | cut -d: -f1,2)
+    if [ -n "$found" ]; then
+        report "a literal password is staged" \
+            "Keep it in a git-ignored .env file or an environment variable; leave CHANGE_ME or \${VAR} here." "$found"
+        status=1
+    fi
+fi
+
+exit $status
