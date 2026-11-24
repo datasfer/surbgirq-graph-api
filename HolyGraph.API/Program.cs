@@ -1,3 +1,4 @@
+using HolyGraph.API.Configs;
 using HolyGraph.API.Extensions;
 using Microsoft.OpenApi;
 
@@ -27,6 +28,18 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 builder.Services.AddApplicationServices(builder.Configuration);
+
+// The Neo4j settings must be real values: the environment (Neo4jConfig__InstanceUri, __UserName, __Password,
+// __DatabaseName) overrides the placeholders in appsettings.Development.json. Without them the API doesn't start.
+var neo4jConfig = builder.Configuration.GetSection(nameof(Neo4jConfig)).Get<Neo4jConfig>() ?? new Neo4jConfig();
+var missingSettings = neo4jConfig.MissingSettings();
+if (missingSettings.Count > 0)
+{
+    Console.Error.WriteLine($"HolyGraph.API doesn't start: set {string.Join(", ", missingSettings)} " +
+                            "(environment variables; see the README, \"Run the API\").");
+    Environment.ExitCode = 1;
+    return;
+}
 
 var app = builder.Build();
 

@@ -19,7 +19,9 @@ public static class ApplicationServiceExtensions
         services.AddSingleton(new AppState());
 
         // services.AddSingleton(GraphDatabase.Driver(neo4jConfig.InstanceUri, AuthTokens.None));
-        services.AddSingleton(GraphDatabase.Driver(neo4jConfig.InstanceUri, AuthTokens.Basic(neo4jConfig.UserName, neo4jConfig.Password)));
+        // The container creates the driver on first use and disposes it when the API stops.
+        services.AddSingleton<IDriver>(_ =>
+            GraphDatabase.Driver(neo4jConfig.InstanceUri, AuthTokens.Basic(neo4jConfig.UserName, neo4jConfig.Password)));
 
         services.AddSingleton<INeo4jGraphRepository, Neo4jGraphRepository>();
         services.AddSingleton<IBookRepository, BookRepository>();

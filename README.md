@@ -25,21 +25,22 @@ version yet. Read [Known issues / security](#known-issues--security) before expo
 
 You need the .NET 10 SDK (or a later one) and a Neo4j database with the Surbgirq graph (see [Data](#data)).
 
-1. **Configure the database.** `HolyGraph.API/appsettings.Development.json` ships with placeholder values (a documentation
-   address and `CHANGE_ME`):
+1. **Configure the database.** `HolyGraph.API/appsettings.Development.json` ships with a local address and a placeholder
+   password:
 
    ```json
    "Neo4jConfig": {
-     "instanceUri": "bolt://192.0.2.20:7687",
+     "instanceUri": "bolt://localhost:7687",
      "databaseName": "bibles",
      "username": "neo4j",
      "password": "CHANGE_ME"
    }
    ```
 
-   Keep those placeholders in the file, and set your values in environment variables: `Neo4jConfig__InstanceUri`,
-   `Neo4jConfig__UserName`, `Neo4jConfig__Password` (see [Secrets](#secrets)). (The database name is hard-coded for now; see
-   Known issues.)
+   Keep the placeholder in the file, and set your values in environment variables: `Neo4jConfig__Password`, and where
+   they differ, `Neo4jConfig__InstanceUri`, `Neo4jConfig__UserName`, `Neo4jConfig__DatabaseName` (see [Secrets](#secrets)).
+   The API refuses to start, naming the variable, while a setting is missing or still `CHANGE_ME`. Outside Development
+   (`appsettings.json` has no `Neo4jConfig`), all four come from the environment.
 2. **Run it:**
 
    ```bash
@@ -47,8 +48,9 @@ You need the .NET 10 SDK (or a later one) and a Neo4j database with the Surbgirq
    dotnet run
    ```
 
-   The launch profile starts the API in the Development environment on port 33010, listening on all network interfaces.
-   Swagger UI: <http://localhost:33010/swagger>.
+   The launch profile starts the API in the Development environment on `127.0.0.1:33010`, so only this machine can reach
+   it. Swagger UI: <http://localhost:33010/swagger>. Where no launch profile applies (a systemd service, a container), set
+   the address with `ASPNETCORE_URLS=http://127.0.0.1:33010`.
 
 All routes are `GET` under `api/` and return JSON:
 
@@ -156,12 +158,8 @@ Nothing runs this code in public at the moment. Fix these before it does:
 |---|---|
 | **Cypher injection:** queries are built by pasting request parameters into the query text. Sessions are read-only, so this exposes read access to the whole graph, not writes. | Parameterized queries, with dynamic labels on Neo4j 5.26+ |
 | **No authentication, and CORS allows any origin.** | CORS limited to the web client; authentication if write routes ever appear |
-| **Swagger is on in Development, and the launch profile runs Development on all interfaces** (`0.0.0.0:33010`). | Swagger off in production; a production profile |
-| `Neo4jGraphRepository.Dispose()` throws `NotImplementedException`. | Dispose the driver properly |
-| The database name is hard-coded (`bibles01`); `Neo4jConfig:databaseName` is ignored. | Read it from the configuration |
 | Hard-coded totals: books (133), word roots (11,713); `…/verses/count` always returns 100. Without the private metadata, chapter and verse counts fall back to fixed defaults. | Count in Cypher |
 | Some routes ignore a parameter or fail: `api/scriptures` ignores `scripture`; `api/scriptures/{translation}/books` fails for any `testament` other than `All`; `api/scriptures/bibles` and `api/scriptures/nareks` return every book. | Fix them, or remove them |
-| The Telegram bot (`surbgirq`, branch `fix-api`) asks for one verse and for sections under `api/scriptures/…`, but this API serves them under `api/verses/…`. | Align the two when the bot runs again |
 | The web client: Angular 16 is out of support; its default translation, `e1994-T`, isn't public; `app.component.ts` hard-codes an API address; the home, tokens and book-detail pages are stubs. | Upgrade and finish it with the revival |
 | Unused template scaffolding: a JWT token service and an SQLite `DataContext`. The Elm and WPF clients are stubs. | Remove or build out while polishing |
 

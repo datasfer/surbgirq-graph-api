@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 
 namespace HolyGraph.API.Services;
 
- public class Neo4jGraphRepository : INeo4jGraphRepository, IDisposable
+ public class Neo4jGraphRepository : INeo4jGraphRepository
 {
     private readonly IDriver _driver;
     private readonly Neo4jConfig _config;
@@ -80,15 +80,9 @@ namespace HolyGraph.API.Services;
         {
             return _driver.AsyncSession(options =>
             {
-                //TODO: get db name from config
-                options.WithDatabase("bibles01");
+                options.WithDatabase(_config.DatabaseName);
                 options.WithDefaultAccessMode(AccessMode.Read);
             });
         }
-        
-     public void Dispose()
-     {
-        throw new NotImplementedException();
-     }
 
 }    
