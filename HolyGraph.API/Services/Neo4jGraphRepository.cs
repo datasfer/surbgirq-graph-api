@@ -32,7 +32,14 @@ namespace HolyGraph.API.Services;
         var jsonify = JsonConvert.SerializeObject(jsonResult);
         return JsonConvert.DeserializeObject<IEnumerable<T>>(jsonify);
      }
-   
+
+     public async Task<object?> RunScalarAsync(string query, object parameters)
+     {
+        await using var dbSession = StartSession();
+        var cursor = await dbSession.RunAsync(query, parameters);
+        return await cursor.FetchAsync() ? cursor.Current[0] : null;
+     }
+
      private async Task<IEnumerable<IDictionary<string, object>>> GetResultAsync(string query)
      {
             using var dbSession = StartSession();

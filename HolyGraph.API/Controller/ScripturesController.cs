@@ -23,23 +23,25 @@ public class ScripturesController : BaseApiController
     #region Meta information
 
     /// <summary>
-    /// verse number of chapter of the book 
+    /// The number of the last verse in a chapter of this translation's book: a bare number. The Telegram bot uses it
+    /// for its page buttons.
     /// </summary>
-    /// <param name="translation"></param>
-    /// <param name="book"></param>
-    /// <param name="num"></param>
-    /// <returns></returns>
+    /// <param name="translation">The translation's ID, e.g. e1994-T</param>
+    /// <param name="book">The book, e.g. Matthew</param>
+    /// <param name="num">The chapter's number</param>
+    /// <returns>The number, or 404 when the chapter has no verses in this translation</returns>
     [HttpGet("{translation}/books/{book}/chapters/{num}/verses/count")]
-    public IActionResult getBookChapterVerses(string translation, string book, int num)
+    public async Task<IActionResult> getBookChapterVerses(string translation, string book, int num)
     {
-        var query =
-        $"MATCH(t:Translation) where t.id = '{translation}' " +
-        $"match (b:Book {{book: '{book}' }})-[:CONTAINS]-()-[*]->(v:Verse) " +
-        $"WHERE v.chapter={num} " +
-        $"return Max(v.verse) as num";
+        // The values go in as parameters, not pasted into the query. A verse hangs off its chapter directly or through
+        // a section, so the path allows one or two CONTAINS steps.
+        const string query =
+            "MATCH (t:Translation {id: $translation})-[:CONTAINS]->(b:Book {book: $book}) " +
+            "MATCH (b)-[:CONTAINS]-(ch:Chapter {num: $num})-[:CONTAINS*1..2]->(v:Verse) " +
+            "RETURN max(v.verse) AS num";
 
-        //return await QueryAndReturnJsonAsync(query);
-        return Content(100.ToString(), "application/json");
+        var last = await _grapthRepository.RunScalarAsync(query, new { translation, book, num });
+        return last is null ? NotFound() : Content(Convert.ToInt64(last).ToString(), "application/json");
     }
 
     /// <summary>

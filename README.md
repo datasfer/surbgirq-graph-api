@@ -158,7 +158,7 @@ Nothing runs this code in public at the moment. Fix these before it does:
 |---|---|
 | **Cypher injection:** queries are built by pasting request parameters into the query text. Sessions are read-only, so this exposes read access to the whole graph, not writes. | Parameterized queries, with dynamic labels on Neo4j 5.26+ |
 | **No authentication, and CORS allows any origin.** | CORS limited to the web client; authentication if write routes ever appear |
-| Hard-coded totals: books (133), word roots (11,713); `…/verses/count` always returns 100. Without the private metadata, chapter and verse counts fall back to fixed defaults. | Count in Cypher |
+| Hard-coded totals: books (133), word roots (11,713). Without the private metadata, chapter and verse counts fall back to fixed defaults. (`…/verses/count` is counted in Cypher since 2026-11, with query parameters.) | Count in Cypher |
 | Some routes ignore a parameter or fail: `api/scriptures` ignores `scripture`; `api/scriptures/{translation}/books` fails for any `testament` other than `All`; `api/scriptures/bibles` and `api/scriptures/nareks` return every book. | Fix them, or remove them |
 | The web client: Angular 16 is out of support; its default translation, `e1994-T`, isn't public; `app.component.ts` hard-codes an API address; the home, tokens and book-detail pages are stubs. | Upgrade and finish it with the revival |
 | Unused template scaffolding: a JWT token service and an SQLite `DataContext`. The Elm and WPF clients are stubs. | Remove or build out while polishing |

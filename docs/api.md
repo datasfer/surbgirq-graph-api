@@ -34,7 +34,7 @@ All routes are `GET`, return JSON, and need no authentication. With the developm
 | `api/scriptures/books/{book}/chapters` | The book's chapters, in every translation |
 | `api/scriptures/{translation}/books/{book}/chapters` | One translation's chapters of the book |
 | `api/scriptures/{translation}/books/{book}/chapters/count` | The book's order, title and chapter count |
-| `api/scriptures/{translation}/books/{book}/chapters/{num}/verses/count` | Always `100`: a stub. *Used by the Telegram bot.* |
+| `api/scriptures/{translation}/books/{book}/chapters/{num}/verses/count` | The number of the chapter's last verse, as a bare number; 404 when the chapter has no verses in that translation. *Used by the Telegram bot.* |
 | `api/scriptures/bibles`, `api/scriptures/nareks` | Stubs: every book node |
 
 ## Verses and sections
