@@ -1,6 +1,6 @@
 # HolyGraph
 
-A REST API (ASP.NET Core 8) and an Angular web client over **Surbgirq**, a Neo4j knowledge graph of Armenian Bible
+A REST API (ASP.NET Core 10) and an Angular web client over **Surbgirq**, a Neo4j knowledge graph of Armenian Bible
 translations, the King James Version, and Bible metadata: people, places, events, years and Easton's Bible Dictionary.
 The graph also holds a lexicon of Classical Armenian word roots (*armat*) and their word forms.
 
@@ -8,14 +8,14 @@ The graph also holds a lexicon of Classical Armenian word roots (*armat*) and th
 The Telegram bot and the data pipeline that builds the graph live in a separate repository,
 [`datasfer/surbgirq`](https://github.com/datasfer/surbgirq) (Haskell).
 
-**Status:** the API builds and starts on .NET 8 (checked in November 2026). It hasn't been run against a current Neo4j
+**Status:** the API builds and starts on .NET 10 (checked on 2026-11-24). It hasn't been run against a current Neo4j
 version yet. Read [Known issues / security](#known-issues--security) before exposing it anywhere.
 
 ## Repository layout
 
 | Folder | What it is |
 |---|---|
-| `HolyGraph.API/` | The REST API: ASP.NET Core 8, the Neo4j .NET driver 5, Swagger |
+| `HolyGraph.API/` | The REST API: ASP.NET Core 10, the Neo4j .NET driver 5, Swagger |
 | `client/` | The Angular 16 web client: read a chapter with its section titles; browse word roots and their forms ([client/README.md](client/README.md)) |
 | `elm-client/` | An Elm 0.19 stub: one search box, no API calls yet |
 | `src/HolyGraph.GUI/` | A WPF stub: an empty window |
@@ -23,7 +23,7 @@ version yet. Read [Known issues / security](#known-issues--security) before expo
 
 ## Run the API
 
-You need the .NET 8 SDK (or a later SDK) and a Neo4j database with the Surbgirq graph (see [Data](#data)).
+You need the .NET 10 SDK (or a later one) and a Neo4j database with the Surbgirq graph (see [Data](#data)).
 
 1. **Configure the database.** `HolyGraph.API/appsettings.Development.json` ships with placeholder values (a documentation
    address and `CHANGE_ME`):
@@ -163,7 +163,7 @@ Nothing runs this code in public at the moment. Fix these before it does:
 | Some routes ignore a parameter or fail: `api/scriptures` ignores `scripture`; `api/scriptures/{translation}/books` fails for any `testament` other than `All`; `api/scriptures/bibles` and `api/scriptures/nareks` return every book. | Fix them, or remove them |
 | The Telegram bot (`surbgirq`, branch `fix-api`) asks for one verse and for sections under `api/scriptures/…`, but this API serves them under `api/verses/…`. | Align the two when the bot runs again |
 | The web client: Angular 16 is out of support; its default translation, `e1994-T`, isn't public; `app.component.ts` hard-codes an API address; the home, tokens and book-detail pages are stubs. | Upgrade and finish it with the revival |
-| Unused template scaffolding: a JWT token service, an SQLite `DataContext`, the Neo4jClient package. The Elm and WPF clients are stubs. | Remove or build out while polishing |
+| Unused template scaffolding: a JWT token service and an SQLite `DataContext`. The Elm and WPF clients are stubs. | Remove or build out while polishing |
 
 ## License
 

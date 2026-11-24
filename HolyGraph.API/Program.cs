@@ -1,5 +1,5 @@
 using HolyGraph.API.Extensions;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
 
